@@ -1,5 +1,6 @@
 //precompiler header
 #include "pch.h"
+#include "Game.h"
 
 //inbclude common namespaces 
 using namespace Windows::ApplicationModel;
@@ -16,13 +17,18 @@ using namespace Platform;
 ref class Engine sealed : public IFrameworkView
 {
 	bool didCloseWindow;
+	CGame Game;
 
 public:
-
+	
 	virtual void Initialize(CoreApplicationView^ appView)
 	{
 		// subscribe OnActivated function to handle the activated event code handl
 		appView->Activated += ref new TypedEventHandler <CoreApplicationView^, IActivatedEventArgs^>(this, &Engine::OnActivated);
+		
+		//settign up the bool to false 
+		didCloseWindow = false;
+		
 		CoreApplication::Suspending += ref new EventHandler<SuspendingEventArgs^>(this, &Engine::OnSuspending);
 		CoreApplication::Resuming += ref new EventHandler<Object^>(this, &Engine::OnResuming);
 	}
@@ -36,9 +42,7 @@ public:
 	virtual void Load(String^EntryPoint){}
 	virtual void Run()
 	{
-		//settign up the bool to false 
-		didCloseWindow = false;
-		
+		Game.Initialize();
 
 		//obtain a pointer to the window
 		CoreWindow^Window = CoreWindow::GetForCurrentThread();
@@ -49,6 +53,9 @@ public:
 		{
 			//run processEvents to dispatch
 			Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+
+			Game.Update();
+			Game.Render();
 		}
 
 	}
