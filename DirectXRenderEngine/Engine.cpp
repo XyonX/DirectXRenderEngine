@@ -15,27 +15,41 @@ using namespace Platform;
 // class definition for the core frameword of this engine
 ref class Engine sealed : public IFrameworkView
 {
+	bool didCloseWindow;
+
 public:
 
 	virtual void Initialize(CoreApplicationView^ appView)
 	{
-		// subscribe OnActivated function to handle the activated event
+		// subscribe OnActivated function to handle the activated event code handl
 		appView->Activated += ref new TypedEventHandler <CoreApplicationView^, IActivatedEventArgs^>(this, &Engine::OnActivated);
+		CoreApplication::Suspending += ref new EventHandler<SuspendingEventArgs^>(this, &Engine::OnSuspending);
+		CoreApplication::Resuming += ref new EventHandler<Object^>(this, &Engine::OnResuming);
 	}
 	virtual void SetWindow(CoreWindow^Window)
 	{
 		Window->PointerPressed += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &Engine::PointerPressed);
 		Window->KeyDown += ref new TypedEventHandler<CoreWindow^,KeyEventArgs^>(this, &Engine::OnKeyDown);
+		Window->PointerWheelChanged += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &Engine::OnPointerWheelChanged);
+		Window->Closed += ref new Windows::Foundation::TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &Engine::OnClosed);
 	}
 	virtual void Load(String^EntryPoint){}
 	virtual void Run()
 	{
+		//settign up the bool to false 
+		didCloseWindow = false;
+		
+
 		//obtain a pointer to the window
 		CoreWindow^Window = CoreWindow::GetForCurrentThread();
 
-		//run processEvents to dispatch
-		Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessUntilQuit);
 
+		//Run the window until the bool gets triggere
+		while (!didCloseWindow)
+		{
+			//run processEvents to dispatch
+			Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+		}
 
 	}
 	virtual void Uninitialize(){}
@@ -49,7 +63,7 @@ public:
 	void PointerPressed(CoreWindow^Windw,PointerEventArgs^Args)
 	{
 		MessageDialog Dialog("", "");
-		Dialog.Content = "Hellow World";
+		Dialog.Content = Args->CurrentPoint->FrameId.ToString();
 		Dialog.Title = "Notice !";
 		Dialog.ShowAsync();
 	
@@ -86,6 +100,29 @@ public:
 			Dialog.ShowAsync();
 		}
 	}
+
+	void OnPointerWheelChanged(CoreWindow^ sender, PointerEventArgs^ args)
+	{
+		int Wheel = args->CurrentPoint->Properties->MouseWheelDelta;
+
+		MessageDialog Dialog("", "");
+		Dialog.Content = Wheel.ToString();
+		Dialog.Title = "MouseWheel Event";
+		Dialog.ShowAsync();
+	}
+
+	void OnSuspending(Object^ sender, SuspendingEventArgs^ args)
+	{
+
+	}
+	void OnResuming(Object^ sender, Object^ args)
+	{
+
+	}
+	void OnClosed(CoreWindow^ sender,CoreWindowEventArgs^ args)
+	{
+		didCloseWindow = true;
+	}
 };
 
 ref class EngineSource sealed : public IFrameworkViewSource
@@ -106,3 +143,4 @@ int main(Array<String^>^ args)
 	CoreApplication::Run(ref new EngineSource);
 	return 0;
 }
+
