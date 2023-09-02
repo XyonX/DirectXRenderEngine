@@ -32,10 +32,10 @@ void CGame::Initialize()
 	swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	// How the swap chain should be utilized
 	swapChainDescription.BufferCount = 2;								//a fromt buffer and a back buffer
 	swapChainDescription.Format = DXGI_FORMAT_B8G8R8A8_UNORM;			//a common swa chain format
-	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// he recommended flip mode
+	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	//recommended flip mode
 	swapChainDescription.SampleDesc.Count = 1;							//disable anti aliasing
 
-	CoreWindow^ Window = CoreWindow::GetForCurrentThread();				// ONTAIN A pointer to the window
+	CoreWindow^ Window = CoreWindow::GetForCurrentThread();				// Obtain A pointer to the window
 
 	HRESULT hr = dxgiFactory->CreateSwapChainForCoreWindow(
 		device.Get(),
@@ -44,14 +44,22 @@ void CGame::Initialize()
 		nullptr,
 		&swapChain);
 
-	/*if (FAILED(hr))
+	//error handling code 
+	if (FAILED(hr))
 	{
 		wchar_t errorMsg[256];
 		swprintf_s(errorMsg, L"Swap Chain Creation Failed! HRESULT: 0x%X", hr);
 		OutputDebugString(errorMsg);
 
 		exit(1); // Terminate with an error code.
-	}*/
+	}
+
+	// get a direct poionter to the back buffer
+	ComPtr<ID3D11Texture2D> backBuffer;
+	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer);
+
+	//create a render targer that points to out back buffer
+	device->CreateRenderTargetView(backBuffer.Get(), nullptr, &renderTarget);
 
 }
 
@@ -64,6 +72,14 @@ void CGame::Update()
 //Single frame Render code
 void CGame::Render()
 {
+	//set the render target as active rendeer target
+	deviceContext->OMSetRenderTargets(1, renderTarget.GetAddressOf(), nullptr);
+
+	//clear the back buffer to some color
+	float color[4] = { 1.0f,1.0f,1.0f,1.0f };
+	deviceContext->ClearRenderTargetView(renderTarget.Get(), color);
+
+
 	//switch the back buffer and the front buffer
 	swapChain->Present(1, 0);
 }
