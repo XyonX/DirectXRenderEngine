@@ -31,20 +31,27 @@ void CGame::Initialize()
 
 	swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	// How the swap chain should be utilized
 	swapChainDescription.BufferCount = 2;								//a fromt buffer and a back buffer
-	//swapChainDescription.Format = DXGI_FORMAT_B5G6R5_UNORM;			//a common swa chain format
-	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;		// he recommended flip mode
+	swapChainDescription.Format = DXGI_FORMAT_B8G8R8A8_UNORM;			//a common swa chain format
+	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// he recommended flip mode
 	swapChainDescription.SampleDesc.Count = 1;							//disable anti aliasing
 
-	CoreWindow^ Window = CoreWindow::GetForCurrentThread();
+	CoreWindow^ Window = CoreWindow::GetForCurrentThread();				// ONTAIN A pointer to the window
 
-	dxgiFactory->CreateSwapChainForCoreWindow(
+	HRESULT hr = dxgiFactory->CreateSwapChainForCoreWindow(
 		device.Get(),
 		reinterpret_cast<IUnknown*>(Window),
 		&swapChainDescription,
 		nullptr,
 		&swapChain);
 
+	/*if (FAILED(hr))
+	{
+		wchar_t errorMsg[256];
+		swprintf_s(errorMsg, L"Swap Chain Creation Failed! HRESULT: 0x%X", hr);
+		OutputDebugString(errorMsg);
 
+		exit(1); // Terminate with an error code.
+	}*/
 
 }
 
@@ -57,5 +64,6 @@ void CGame::Update()
 //Single frame Render code
 void CGame::Render()
 {
-	
+	//switch the back buffer and the front buffer
+	swapChain->Present(1, 0);
 }

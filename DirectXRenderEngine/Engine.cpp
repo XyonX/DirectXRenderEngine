@@ -54,6 +54,7 @@ public:
 			//run processEvents to dispatch
 			Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
+			//calling update and render continously
 			Game.Update();
 			Game.Render();
 		}
