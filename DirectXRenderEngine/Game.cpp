@@ -2,7 +2,7 @@
 #include"Game.h"
 #include <fstream>
 
-
+/*
 Array<byte>^ LoadShaderFile(std::string File)
 {
 	Array<byte>^ FileData = nullptr;
@@ -24,7 +24,33 @@ Array<byte>^ LoadShaderFile(std::string File)
 
 	}
 	return FileData;
+}*/
+
+
+// this function loads a file into an Array^
+Array<byte>^ LoadShaderFile(std::string File)
+{
+	Array<byte>^ FileData = nullptr;
+
+	// open the file
+	std::ifstream VertexFile(File, std::ios::in | std::ios::binary | std::ios::ate);
+
+	// if open was successful
+	if (VertexFile.is_open())
+	{
+		// find the length of the file
+		int Length = (int)VertexFile.tellg();
+
+		// collect the file data
+		FileData = ref new Array<byte>(Length);
+		VertexFile.seekg(0, std::ios::beg);
+		VertexFile.read(reinterpret_cast<char*>(FileData->Data), Length);
+		VertexFile.close();
+	}
+
+	return FileData;
 }
+
 
 //Initializes and perform Direct3D
 void CGame::Initialize()
@@ -86,6 +112,18 @@ void CGame::Initialize()
 	//create a render targer that points to out back buffer
 	device->CreateRenderTargetView(backBuffer.Get(), nullptr, &renderTarget);
 
+	//set the viewport
+	D3D11_VIEWPORT viewport = { 0 };
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = Window->Bounds.Width;
+	viewport.Height = Window->Bounds.Height;
+
+	deviceContext->RSSetViewports(1, &viewport);
+
+	InitGraphics();
+	InitPipeline();
+
 }
 
 void CGame::InitGraphics()
@@ -97,12 +135,19 @@ void CGame::InitGraphics()
 		{-0.5f,-0.5f,0.0f}
 	};
 
+	// creating the buffer description
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
+
+	// the size of the buffer we want to make 
 	bufferDesc.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(Vertices);
+
+	// what kind of buffer we want 
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
+	//
 	D3D11_SUBRESOURCE_DATA subResourceData = { Vertices , 0 , 0 };
 
+	//creating the buffer and storing in the vertex bufffer com object
 	device->CreateBuffer(&bufferDesc, &subResourceData, &vertexBuffer);
 
 }
@@ -124,10 +169,20 @@ void CGame::InitPipeline()
 	deviceContext->VSSetShader(vertexShader.Get(), nullptr, 0);
 	deviceContext->PSSetShader(pixelShader.Get(), nullptr, 0);
 
+	//initialize input layout
+	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
 
+	};
+	//creating the input layout 
+	device->CreateInputLayout(inputElementDesc, ARRAYSIZE(inputElementDesc), VSFile->Data, VSFile->Length, &inputLayout);
 
+	//set the input layout 
+	deviceContext->IASetInputLayout(inputLayout.Get());
 
-
+	
 
 
 }
@@ -145,10 +200,22 @@ void CGame::Render()
 	deviceContext->OMSetRenderTargets(1, renderTarget.GetAddressOf(), nullptr);
 
 	//clear the back buffer to some color
-	float color[4] = { 1.0f,1.0f,1.0f,1.0f };
+	float color[4] = { 0.219f,0.290f,0.431f,0.8f };
 	deviceContext->ClearRenderTargetView(renderTarget.Get(), color);
 
+	//seting up vertex buffer
+	UINT stride = sizeof(VERTEX);
+	UINT offset = 0;
+	deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+
+	//settin up the premitive topology
+	deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->Draw(3, 0);
+
+	//
 
 	//switch the back buffer and the front buffer
 	swapChain->Present(1, 0);
+
+	
 }
