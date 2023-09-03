@@ -1,5 +1,30 @@
 #include"pch.h"
 #include"Game.h"
+#include <fstream>
+
+
+Array<byte>^ LoadShaderFile(std::string File)
+{
+	Array<byte>^ FileData = nullptr;
+
+	//open the file 
+	std::ifstream VertexFile(File, std::ios::in | std::ios::binary | std::ios::ate);
+	//check wheater file open suicessfully
+
+	if (VertexFile.is_open())
+	{
+		//find the file length
+		int length = (int)VertexFile.tellg();
+
+		//collect the data
+		FileData = ref new Array<byte>(length);
+		VertexFile.seekg(0, std::ios::beg);
+		VertexFile.read(reinterpret_cast<char*>(FileData->Data), length);
+		VertexFile.close();
+
+	}
+	return FileData;
+}
 
 //Initializes and perform Direct3D
 void CGame::Initialize()
@@ -29,7 +54,7 @@ void CGame::Initialize()
 	//setup the 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDescription = { 0 };
 
-	swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	// How the swap chain should be utilized
+	swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	//How the swap chain should be utilized
 	swapChainDescription.BufferCount = 2;								//a fromt buffer and a back buffer
 	swapChainDescription.Format = DXGI_FORMAT_B8G8R8A8_UNORM;			//a common swa chain format
 	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	//recommended flip mode
@@ -60,6 +85,50 @@ void CGame::Initialize()
 
 	//create a render targer that points to out back buffer
 	device->CreateRenderTargetView(backBuffer.Get(), nullptr, &renderTarget);
+
+}
+
+void CGame::InitGraphics()
+{
+	VERTEX Vertices[] =
+	{
+		{0.0f,0.5f,0.0f },
+		{0.5f,-0.5f,0.0f},
+		{-0.5f,-0.5f,0.0f}
+	};
+
+	D3D11_BUFFER_DESC bufferDesc = { 0 };
+	bufferDesc.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(Vertices);
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA subResourceData = { Vertices , 0 , 0 };
+
+	device->CreateBuffer(&bufferDesc, &subResourceData, &vertexBuffer);
+
+}
+
+//initializes the gpu and prepares direct3d for rendering
+void CGame::InitPipeline()
+{
+	//load shader file
+	Array<byte>^ VSFile = LoadShaderFile("VertexShader.cso");
+
+	//load shader file
+	Array<byte>^ PSFile = LoadShaderFile("PixelShader.cso");
+
+	//create the shader object
+	device->CreateVertexShader(VSFile->Data, VSFile->Length, nullptr, &vertexShader);
+	device->CreatePixelShader(PSFile->Data, PSFile->Length, nullptr, &pixelShader);
+
+	//set the shader as active shader
+	deviceContext->VSSetShader(vertexShader.Get(), nullptr, 0);
+	deviceContext->PSSetShader(pixelShader.Get(), nullptr, 0);
+
+
+
+
+
+
 
 }
 
