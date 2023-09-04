@@ -20,11 +20,18 @@ public:
 	ComPtr<ID3D11PixelShader>pixelShader;
 	ComPtr<ID3D11InputLayout>inputLayout;
 
+	ComPtr<ID3D11Buffer>constBuffer;
+
 
 	struct VERTEX
 	{
 		float X, Y, Z;
 		float R, G, B;
+	};
+	struct COLORMOD
+	{
+		float RedLevel;
+		float BlueLevel;
 	};
 
 	void Initialize();	//starting up code

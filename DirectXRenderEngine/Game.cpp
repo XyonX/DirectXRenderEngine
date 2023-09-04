@@ -202,6 +202,16 @@ void CGame::InitPipeline()
 	//set the input layout 
 	deviceContext->IASetInputLayout(inputLayout.Get());
 
+	///setup const buffers
+
+	D3D11_BUFFER_DESC bufferDesc = { 0 };
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = 16;
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	
+	device->CreateBuffer(&bufferDesc, nullptr, &constBuffer);
+	deviceContext->VSSetConstantBuffers(0, 1, constBuffer.GetAddressOf());
+
 }
 
 //Perform Updated to the game state
@@ -232,11 +242,17 @@ void CGame::Render()
 
 	//settin up the premitive topology
 	deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	COLORMOD Colors;
+	Colors.RedLevel = 0.5f;
+	Colors.BlueLevel = 0.5f;
+	//set the new value for the const buffer
+	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &Colors, 0, 0);
 	deviceContext->Draw(3, 0);
+
+
 
 
 	//switch the back buffer and the front buffer
 	swapChain->Present(1, 0);
-
-	
 }
