@@ -77,6 +77,8 @@ void CGame::Initialize()
 	ComPtr<IDXGIFactory2> dxgiFactory;
 	dxgiAdapter->GetParent(__uuidof(IDXGIFactory2), &dxgiFactory);
 
+	/// SETTING UP THE SWAP CHAIN
+
 	//setup the 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDescription = { 0 };
 
@@ -87,6 +89,8 @@ void CGame::Initialize()
 	swapChainDescription.SampleDesc.Count = 1;							//disable anti aliasing
 
 	CoreWindow^ Window = CoreWindow::GetForCurrentThread();				// Obtain A pointer to the window
+
+	/// CREATING HE SWAPCHAIN
 
 	HRESULT hr = dxgiFactory->CreateSwapChainForCoreWindow(
 		device.Get(),
@@ -105,12 +109,17 @@ void CGame::Initialize()
 		exit(1); // Terminate with an error code.
 	}
 
+	///SETTING UP THE BACKBUFFER WITH SWAPCHAIN
+
 	// get a direct poionter to the back buffer
 	ComPtr<ID3D11Texture2D> backBuffer;
 	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer);
 
 	//create a render targer that points to out back buffer
 	device->CreateRenderTargetView(backBuffer.Get(), nullptr, &renderTarget);
+
+
+	/// SETTING UP THE VIEWPORT 
 
 	//set the viewport
 	D3D11_VIEWPORT viewport = { 0 };
@@ -121,6 +130,8 @@ void CGame::Initialize()
 
 	deviceContext->RSSetViewports(1, &viewport);
 
+
+	/// CALLING THE GRAPHIC INITIALIZATION FILE
 	InitGraphics();
 	InitPipeline();
 
@@ -128,12 +139,16 @@ void CGame::Initialize()
 
 void CGame::InitGraphics()
 {
+	/// SETTING UP THE VERTEX DATA 
+
 	VERTEX Vertices[] =
 	{
-		{0.0f,0.5f,0.0f },
-		{0.5f,-0.5f,0.0f},
-		{-0.5f,-0.5f,0.0f}
+		{0.0f,0.5f,0.0f		, 1.0f,0.0f,0.0f},
+		{0.5f,-0.5f,0.0f	,0.0f,1.0f,0.0f },
+		{-0.5f,-0.5f,0.0f	,0.0f,0.0f,1.0f},
 	};
+
+	///SETTING UP THE VERTEX  BUFFER
 
 	// creating the buffer description
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
@@ -155,6 +170,9 @@ void CGame::InitGraphics()
 //initializes the gpu and prepares direct3d for rendering
 void CGame::InitPipeline()
 {
+
+	///CREATING SHADERS
+
 	//load shader file
 	Array<byte>^ VSFile = LoadShaderFile("VertexShader.cso");
 
@@ -169,6 +187,8 @@ void CGame::InitPipeline()
 	deviceContext->VSSetShader(vertexShader.Get(), nullptr, 0);
 	deviceContext->PSSetShader(pixelShader.Get(), nullptr, 0);
 
+	/// CREATING INPUT LAYOUT
+
 	//initialize input layout
 	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
 	{
@@ -181,9 +201,6 @@ void CGame::InitPipeline()
 
 	//set the input layout 
 	deviceContext->IASetInputLayout(inputLayout.Get());
-
-	
-
 
 }
 
@@ -199,20 +216,24 @@ void CGame::Render()
 	//set the render target as active rendeer target
 	deviceContext->OMSetRenderTargets(1, renderTarget.GetAddressOf(), nullptr);
 
+	///SETTING UP A COLOR FOR THE BACKGROUND
+
 	//clear the back buffer to some color
 	float color[4] = { 0.219f,0.290f,0.431f,0.8f };
 	deviceContext->ClearRenderTargetView(renderTarget.Get(), color);
 
+	/// SETTING UP THE VERTEX BUFFER 
 	//seting up vertex buffer
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
 	deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
 
+
+
 	//settin up the premitive topology
-	deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->Draw(3, 0);
 
-	//
 
 	//switch the back buffer and the front buffer
 	swapChain->Present(1, 0);

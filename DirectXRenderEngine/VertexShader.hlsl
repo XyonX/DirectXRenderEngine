@@ -1,4 +1,19 @@
-float4 main( float4 pos : POSITION ) : SV_POSITION
+
+struct VOut
 {
-	return pos;
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+	
+	
+VOut main( float4 position : POSITION , float4 color : COLOR )
+{
+	//create the struct 
+    VOut Output;
+	
+    Output.position = position;
+    Output.color = 1-color;
+	
+    
+    return Output;
 }

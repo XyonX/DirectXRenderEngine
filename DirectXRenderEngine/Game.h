@@ -24,6 +24,7 @@ public:
 	struct VERTEX
 	{
 		float X, Y, Z;
+		float R, G, B;
 	};
 
 	void Initialize();	//starting up code
