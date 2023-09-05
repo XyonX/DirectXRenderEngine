@@ -1,8 +1,7 @@
 
 cbuffer constBuffer
 {
-    float RedLevel;
-    float BlueLevel;
+    float4x4 matFinal;
 };
 
 struct VOut
@@ -19,14 +18,12 @@ VOut main( float4 position : POSITION , float4 color : COLOR )
     
 
 	//Manipulat the positon befpe passing to other shaders
-    Output.position = position;
+    Output.position = mul(matFinal ,position);
     
     
     //Manipulate the color before passign to the other shaders 
     Output.color = color;
-    Output.color.r *= RedLevel;
-    Output.color.b *= BlueLevel;
-    
+
     //float4 a, b;
 
     //mul(a,b);

@@ -5,6 +5,7 @@
 using namespace Microsoft::WRL;
 using namespace Windows::UI::Core;
 using namespace Platform;
+using namespace DirectX;
 
 class CGame
 {
@@ -28,10 +29,9 @@ public:
 		float X, Y, Z;
 		float R, G, B;
 	};
-	struct COLORMOD
+	struct OFFSET
 	{
-		float RedLevel;
-		float BlueLevel;
+		float X, Y, Z;
 	};
 
 	void Initialize();	//starting up code
@@ -40,6 +40,8 @@ public:
 	void Update();		//Code that manipulate game
 	void Render();		//Draw graphics
 
+
+	float time;
 
 
 };

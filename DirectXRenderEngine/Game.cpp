@@ -135,6 +135,9 @@ void CGame::Initialize()
 	InitGraphics();
 	InitPipeline();
 
+	//set the time to -0
+	time = 0;
+
 }
 
 void CGame::InitGraphics()
@@ -206,18 +209,19 @@ void CGame::InitPipeline()
 
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = 16;
+	bufferDesc.ByteWidth = 64;
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	
 	device->CreateBuffer(&bufferDesc, nullptr, &constBuffer);
 	deviceContext->VSSetConstantBuffers(0, 1, constBuffer.GetAddressOf());
+
 
 }
 
 //Perform Updated to the game state
 void CGame::Update()
 {
-	
+	time += 0.05f;
 }
 
 //Single frame Render code
@@ -243,11 +247,48 @@ void CGame::Render()
 	//settin up the premitive topology
 	deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	COLORMOD Colors;
-	Colors.RedLevel = 0.5f;
-	Colors.BlueLevel = 0.5f;
-	//set the new value for the const buffer
-	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &Colors, 0, 0);
+	///	Setup the new value for the Const Buffer
+
+	//COLORMOD Colors;
+	//Colors.RedLevel = 0.5f;
+	//Colors.BlueLevel = 0.5f;
+	////set the new value for the const buffer
+	//deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &Colors, 0, 0);
+
+	OFFSET Offset;
+	//Offset.X = .25;
+	//Offset.Y = .3;
+	//Offset.Z = .4;
+	
+
+	///MAKING THE MESH DATA
+
+	//calculate the world transformation
+	XMMATRIX matWorld = XMMatrixRotationY(time);
+	
+	//calculate the view transformation
+	XMVECTOR camPosition = XMVectorSet(1.5f, 0.5f, 1.5f, 0.0f);
+	XMVECTOR camLookAt = XMVectorSet(0.0f, 0.0f, 0.0f,0.0f);
+	XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMMATRIX matView = XMMatrixLookAtLH(camPosition, camLookAt, camUp);
+
+	//calculate the projection transformation
+	CoreWindow^Window = CoreWindow::GetForCurrentThread();
+
+	XMMATRIX matProjection = XMMatrixPerspectiveLH(XMConvertToRadians(45),
+		(FLOAT)Window->Bounds.Width / (FLOAT)Window->Bounds.Height,
+		1.0f,
+		100.0f);
+
+	//calculate the final matrix
+	XMMATRIX matFinal = matWorld * matView * matProjection;
+
+
+	///send the data to the const buffers
+
+	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
+
+
 	deviceContext->Draw(3, 0);
 
 
