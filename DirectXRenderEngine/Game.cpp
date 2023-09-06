@@ -150,6 +150,7 @@ void CGame::InitGraphics()
 		{0.5f,-0.5f,0.0f	,0.0f,1.0f,0.0f },
 		{-0.5f,-0.5f,0.0f	,0.0f,0.0f,1.0f},
 	};
+	 
 
 	///SETTING UP THE VERTEX  BUFFER
 
@@ -236,6 +237,8 @@ void CGame::Render()
 	float color[4] = { 0.219f,0.290f,0.431f,0.8f };
 	deviceContext->ClearRenderTargetView(renderTarget.Get(), color);
 
+	///TODO:Clear the depth buffer
+
 	/// SETTING UP THE VERTEX BUFFER 
 	//seting up vertex buffer
 	UINT stride = sizeof(VERTEX);
@@ -246,19 +249,6 @@ void CGame::Render()
 
 	//settin up the premitive topology
 	deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	///	Setup the new value for the Const Buffer
-
-	//COLORMOD Colors;
-	//Colors.RedLevel = 0.5f;
-	//Colors.BlueLevel = 0.5f;
-	////set the new value for the const buffer
-	//deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &Colors, 0, 0);
-
-	OFFSET Offset;
-	//Offset.X = .25;
-	//Offset.Y = .3;
-	//Offset.Z = .4;
 	
 
 	///MAKING THE MESH DATA
