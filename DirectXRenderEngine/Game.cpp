@@ -119,6 +119,26 @@ void CGame::Initialize()
 	device->CreateRenderTargetView(backBuffer.Get(), nullptr, &renderTarget);
 
 
+	///create the zbuffer
+	D3D11_TEXTURE2D_DESC texD = { 0 };
+
+	texD.Width = Window->Bounds.Width;
+	texD.Height = Window->Bounds.Height;
+	texD.ArraySize = 1;
+	texD.MipLevels = 1;
+	texD.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	texD.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+
+	ComPtr<ID3D11Texture2D>zBufferTexture;
+	device->CreateTexture2D(&texD, nullptr, &zBufferTexture);
+
+	CD3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
+	ZeroMemory(&dsvd, sizeof(dsvd));
+	dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	device->CreateDepthStencilView(zBufferTexture.Get(), &dsvd, &zBuffer);
+
+
 	/// SETTING UP THE VIEWPORT 
 
 	//set the viewport
@@ -127,6 +147,8 @@ void CGame::Initialize()
 	viewport.TopLeftY = 0;
 	viewport.Width = Window->Bounds.Width;
 	viewport.Height = Window->Bounds.Height;
+	viewport.MinDepth = 0; // the closest object can be on  the depth buffer
+	viewport.MaxDepth = 1;// the farthest object can be on  the depth buffer
 
 	deviceContext->RSSetViewports(1, &viewport);
 
@@ -237,7 +259,9 @@ void CGame::Render()
 	float color[4] = { 0.219f,0.290f,0.431f,0.8f };
 	deviceContext->ClearRenderTargetView(renderTarget.Get(), color);
 
-	///TODO:Clear the depth buffer
+	///Clear the depth 
+	deviceContext->ClearDepthStencilView(zBuffer.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
 
 	/// SETTING UP THE VERTEX BUFFER 
 	//seting up vertex buffer
@@ -254,8 +278,19 @@ void CGame::Render()
 	///MAKING THE MESH DATA
 
 	//calculate the world transformation
-	XMMATRIX matWorld = XMMatrixRotationY(time);
-	
+
+	XMMATRIX matRotate[4];
+	matRotate[0] = XMMatrixRotationY(time);
+	matRotate[1] = XMMatrixRotationY(time + 3.14159f);
+	matRotate[2] = XMMatrixRotationY(time);
+	matRotate[3] = XMMatrixRotationY(time + 3.14159f);
+
+	XMMATRIX matTranslate[4];
+	matTranslate[0] = XMMatrixTranslation(0.0f, 0.0f, 0.5f);
+	matTranslate[1] = XMMatrixTranslation(0.0f, 0.0f, 0.5f);
+	matTranslate[2] = XMMatrixTranslation(0.0f, 0.0f, -0.5f);
+	matTranslate[3] = XMMatrixTranslation(0.0f, 0.0f, -0.5f);
+
 	//calculate the view transformation
 	XMVECTOR camPosition = XMVectorSet(1.5f, 0.5f, 1.5f, 0.0f);
 	XMVECTOR camLookAt = XMVectorSet(0.0f, 0.0f, 0.0f,0.0f);
@@ -271,16 +306,24 @@ void CGame::Render()
 		100.0f);
 
 	//calculate the final matrix
-	XMMATRIX matFinal = matWorld * matView * matProjection;
+	// WVP matrix
+	XMMATRIX matFinal[4];
+	matFinal[0] = matTranslate[0] * matRotate[0] *matView* matProjection;		// here the mat world is divided by mmat translate * mat rotate
+	matFinal[1] = matTranslate[1] * matRotate[1] * matView * matProjection;
+	matFinal[2] = matTranslate[2] * matRotate[2] * matView * matProjection;
+	matFinal[3] = matTranslate[3] * matRotate[3] * matView * matProjection;
+
 
 
 	///send the data to the const buffers
-
-	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
-
-
+	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[0], 0, 0);
 	deviceContext->Draw(3, 0);
-
+	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[1], 0, 0);
+	deviceContext->Draw(3, 0);
+	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[2], 0, 0);
+	deviceContext->Draw(3, 0);
+	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[3], 0, 0);
+	deviceContext->Draw(3, 0);
 
 
 
