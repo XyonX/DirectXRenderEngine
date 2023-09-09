@@ -82,30 +82,108 @@ public:
 
 		if (args->VirtualKey == VirtualKey::W)
 		{
-			Dialog.Content = "Move Forward";
-			Dialog.Title = "W Pressed !";
-			Dialog.ShowAsync();
-		}
+			//Dialog.Content = "Move Forward";
+			//Dialog.Title = "W Pressed !";
+			//Dialog.ShowAsync();
 
-		else if (args->VirtualKey == VirtualKey::A)
-		{
-			Dialog.Content = "Move Backward";
-			Dialog.Title = "A Pressed !";
-			Dialog.ShowAsync();
+			// Load the current camPosition into a temporary variable
+			XMVECTOR tempPosition = Game.camPosition;
+
+			// Increase the X component by a desired amount (e.g., 0.1f)
+			tempPosition = XMVectorAdd(tempPosition, XMVectorSet(0.0f, 0.0f, -0.1f, 0.0f));
+
+			// Store the modified position back into camPosition
+			Game.camPosition = tempPosition;
+			//OutputDebugString(L"Debug message\n");
+
+			//XMVECTOR vectorToPrint = Game.camPosition;
+
+			//// Create a buffer to store the formatted string
+			//char buffer[100]; // Adjust the size according to your needs
+
+			//// Format the XMVECTOR and store it in the buffer
+			//sprintf_s(buffer, sizeof(buffer), "Vector: X=%.2f, Y=%.2f, Z=%.2f, W=%.2f", XMVectorGetX(vectorToPrint), XMVectorGetY(vectorToPrint), XMVectorGetZ(vectorToPrint), XMVectorGetW(vectorToPrint));
+
+			//// Output or display the formatted string
+			//OutputDebugStringA(buffer); // Use OutputDebugStringA for ANSI strings
+			
 		}
 
 		else if (args->VirtualKey == VirtualKey::S)
 		{
-			Dialog.Content = "Move Left";
-			Dialog.Title = "S Pressed !";
-			Dialog.ShowAsync();
+			//Dialog.Content = "Move Left";
+			//Dialog.Title = "S Pressed !";
+			//Dialog.ShowAsync();
+
+						// Load the current camPosition into a temporary variable
+			XMVECTOR tempPosition = Game.camPosition;
+
+			// Increase the X component by a desired amount (e.g., 0.1f)
+			tempPosition = XMVectorAdd(tempPosition, XMVectorSet(0.0f, 0.0f, 0.1f, 0.0f));
+
+			// Store the modified position back into camPosition
+			Game.camPosition = tempPosition;
+
+		}
+		else if (args->VirtualKey == VirtualKey::A)
+		{
+			//Dialog.Content = "Move Backward";
+			//Dialog.Title = "A Pressed !";
+			//Dialog.ShowAsync();
+
+			XMVECTOR tempPosition = Game.camPosition;
+
+			// Increase the X component by a desired amount (e.g., 0.1f)
+			tempPosition = XMVectorAdd(tempPosition, XMVectorSet(-0.1f, 0.0f, 0.0f, 0.0f));
+
+			// Store the modified position back into camPosition
+			Game.camPosition = tempPosition;
+
+
 		}
 
 		else if (args->VirtualKey == VirtualKey::D)
 		{
-			Dialog.Content = "Right Forward";
-			Dialog.Title = "D Pressed !";
-			Dialog.ShowAsync();
+			//Dialog.Content = "Right Forward";
+			//Dialog.Title = "D Pressed !";
+			//Dialog.ShowAsync();
+
+
+			XMVECTOR tempPosition = Game.camPosition;
+
+			// Increase the X component by a desired amount (e.g., 0.1f)
+			tempPosition = XMVectorAdd(tempPosition, XMVectorSet(0.1f, 0.0f, 0.0f, 0.0f));
+
+			// Store the modified position back into camPosition
+			Game.camPosition = tempPosition;
+		}
+		else if (args->VirtualKey == VirtualKey::Q)
+		{
+			//Dialog.Content = "Right Forward";
+			//Dialog.Title = "D Pressed !";
+			//Dialog.ShowAsync();
+
+			XMVECTOR tempPosition = Game.camPosition;
+
+			// Increase the X component by a desired amount (e.g., 0.1f)
+			tempPosition = XMVectorAdd(tempPosition, XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f));
+
+			// Store the modified position back into camPosition
+			Game.camPosition = tempPosition;
+		}
+		else if (args->VirtualKey == VirtualKey::E)
+		{
+			//Dialog.Content = "Right Forward";
+			//Dialog.Title = "D Pressed !";
+			//Dialog.ShowAsync();
+
+			XMVECTOR tempPosition = Game.camPosition;
+
+			// Increase the X component by a desired amount (e.g., 0.1f)
+			tempPosition = XMVectorAdd(tempPosition, XMVectorSet(0.0f, -0.1f, 0.0f, 0.0f));
+
+			// Store the modified position back into camPosition
+			Game.camPosition = tempPosition;
 		}
 	}
 

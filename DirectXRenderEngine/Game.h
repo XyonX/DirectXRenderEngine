@@ -16,6 +16,7 @@ public:
 	ComPtr<IDXGISwapChain1> swapChain;				// the swap chain interface
 	ComPtr<ID3D11RenderTargetView>renderTarget;
 	ComPtr<ID3D11Buffer>vertexBuffer;
+	ComPtr<ID3D11Buffer>IndexBuffer;
 
 	ComPtr<ID3D11VertexShader>vertexShader;
 	ComPtr<ID3D11PixelShader>pixelShader;
@@ -23,6 +24,7 @@ public:
 
 	ComPtr<ID3D11Buffer>constBuffer;
 	ComPtr<ID3D11DepthStencilView>zBuffer;
+
 
 
 	struct VERTEX
@@ -38,11 +40,20 @@ public:
 	void Initialize();	//starting up code
 	void InitGraphics();
 	void InitPipeline();
+	void InitData();
 	void Update();		//Code that manipulate game
 	void Render();		//Draw graphics
 
 
 	float time;
+
+	XMVECTOR camPosition;
+	XMVECTOR camLookAt;
+	XMVECTOR camUp;
+
+	//XMFLOAT3 camPosition;
+	//XMFLOAT3 camLookAt;
+	//XMFLOAT3 camUp;
 
 
 };

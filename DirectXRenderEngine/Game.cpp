@@ -2,30 +2,6 @@
 #include"Game.h"
 #include <fstream>
 
-/*
-Array<byte>^ LoadShaderFile(std::string File)
-{
-	Array<byte>^ FileData = nullptr;
-
-	//open the file 
-	std::ifstream VertexFile(File, std::ios::in | std::ios::binary | std::ios::ate);
-	//check wheater file open suicessfully
-
-	if (VertexFile.is_open())
-	{
-		//find the file length
-		int length = (int)VertexFile.tellg();
-
-		//collect the data
-		FileData = ref new Array<byte>(length);
-		VertexFile.seekg(0, std::ios::beg);
-		VertexFile.read(reinterpret_cast<char*>(FileData->Data), length);
-		VertexFile.close();
-
-	}
-	return FileData;
-}*/
-
 
 // this function loads a file into an Array^
 Array<byte>^ LoadShaderFile(std::string File)
@@ -156,9 +132,9 @@ void CGame::Initialize()
 	/// CALLING THE GRAPHIC INITIALIZATION FILE
 	InitGraphics();
 	InitPipeline();
+	InitData();
 
-	//set the time to -0
-	time = 0;
+
 
 }
 
@@ -168,9 +144,16 @@ void CGame::InitGraphics()
 
 	VERTEX Vertices[] =
 	{
-		{0.0f,0.5f,0.0f		, 1.0f,0.0f,0.0f},
-		{0.5f,-0.5f,0.0f	,0.0f,1.0f,0.0f },
-		{-0.5f,-0.5f,0.0f	,0.0f,0.0f,1.0f},
+		{-1.0f,1.0f,-0.5f,		1.0f,0.0f,0.0f},
+		{1.0f,1.0f,-0.5f,		0.0f,1.0f,0.0f},
+		{-1.0f,-1.0f,-0.5f,		0.0f,0.0f,1.0f},
+		{1.0f,-1.0f,-0.5f,		1.0f,1.0f,0.0f},
+
+		{-1.0f,1.0f,0.5f,		1.0f,0.0f,0.0f},
+		{1.0f,1.0f,0.5f,		0.0f,1.0f,0.0f},
+		{-1.0f,-1.0f,0.5f,		0.0f,0.0f,1.0f},
+		{1.0f,-1.0f,0.5f,		1.0f,1.0f,0.0f},
+
 	};
 	 
 
@@ -190,6 +173,49 @@ void CGame::InitGraphics()
 
 	//creating the buffer and storing in the vertex bufffer com object
 	device->CreateBuffer(&bufferDesc, &subResourceData, &vertexBuffer);
+
+	/// Crreating the index buffer
+	short OurIndices[] = 
+	{
+		//0,1,2,	//Front
+		//2,1,3,	
+
+		//4,5,6,	//Back
+		//6,5,7,	
+
+		//4,0,6,	//left
+		//6,0,2,
+		//	
+		//4,5,0,	//Top
+		//0,5,1,
+
+		//5,7,1,	//Right
+		//1,7,3,
+
+		//7,3,6,	//Bottom
+		//6,3,2,
+		0,1,2,
+		2,1,3,
+		4,0,6,
+		6,0,2,
+		7,5,6,
+		6,5,4,
+		3,1,7,
+		7,1,5,
+		4,5,0,
+		0,5,1,
+		3,7,2,
+		2,7,6,
+
+
+	};
+
+	//create the index buffer
+	D3D11_BUFFER_DESC indexDesc = { 0 };
+	indexDesc.ByteWidth = sizeof( short) * ARRAYSIZE(OurIndices);
+	indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	D3D11_SUBRESOURCE_DATA subResourceDataindices = { OurIndices,0,0 };
+	device->CreateBuffer(&indexDesc, &subResourceDataindices, &IndexBuffer);
 
 }
 
@@ -241,10 +267,20 @@ void CGame::InitPipeline()
 
 }
 
+void CGame::InitData()
+{
+	//set the time to -0
+	time = 0;
+
+	camPosition = XMVectorSet(1.5f, 0.5f, 1.5f, 0.0f);
+	camLookAt = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+}
+
 //Perform Updated to the game state
 void CGame::Update()
 {
-	time += 0.05f;
+	time += 0.0005f;
 }
 
 //Single frame Render code
@@ -268,35 +304,40 @@ void CGame::Render()
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
 	deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+	deviceContext->IASetIndexBuffer(IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 
 
 	//settin up the premitive topology
-	deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	
 
-	///MAKING THE MESH DATA
+	///Configuring the matrices
 
-	//calculate the world transformation
+	///Mat World
 
-	XMMATRIX matRotate[4];
-	matRotate[0] = XMMatrixRotationY(time);
-	matRotate[1] = XMMatrixRotationY(time + 3.14159f);
-	matRotate[2] = XMMatrixRotationY(time);
-	matRotate[3] = XMMatrixRotationY(time + 3.14159f);
+	//XMMATRIX matRotate = XMMatrixRotationY(time);
+	XMMATRIX matRotate = XMMatrixIdentity();
 
-	XMMATRIX matTranslate[4];
-	matTranslate[0] = XMMatrixTranslation(0.0f, 0.0f, 0.5f);
-	matTranslate[1] = XMMatrixTranslation(0.0f, 0.0f, 0.5f);
-	matTranslate[2] = XMMatrixTranslation(0.0f, 0.0f, -0.5f);
-	matTranslate[3] = XMMatrixTranslation(0.0f, 0.0f, -0.5f);
-
+	
+	///mat View
+	
 	//calculate the view transformation
-	XMVECTOR camPosition = XMVectorSet(1.5f, 0.5f, 1.5f, 0.0f);
-	XMVECTOR camLookAt = XMVectorSet(0.0f, 0.0f, 0.0f,0.0f);
-	XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
 	XMMATRIX matView = XMMatrixLookAtLH(camPosition, camLookAt, camUp);
 
+	//XMVECTOR vectorToPrint = camPosition;
+
+	//// Create a buffer to store the formatted string
+	//char buffer[100]; // Adjust the size according to your needs
+
+	//// Format the XMVECTOR and store it in the buffer
+	//sprintf_s(buffer, sizeof(buffer), "Vector: X=%.2f, Y=%.2f, Z=%.2f, W=%.2f", XMVectorGetX(vectorToPrint), XMVectorGetY(vectorToPrint), XMVectorGetZ(vectorToPrint), XMVectorGetW(vectorToPrint));
+
+	//// Output or display the formatted string
+	//OutputDebugStringA(buffer); // Use OutputDebugStringA for ANSI strings
+
+	///mat proj
 	//calculate the projection transformation
 	CoreWindow^Window = CoreWindow::GetForCurrentThread();
 
@@ -305,25 +346,16 @@ void CGame::Render()
 		1.0f,
 		100.0f);
 
-	//calculate the final matrix
-	// WVP matrix
-	XMMATRIX matFinal[4];
-	matFinal[0] = matTranslate[0] * matRotate[0] *matView* matProjection;		// here the mat world is divided by mmat translate * mat rotate
-	matFinal[1] = matTranslate[1] * matRotate[1] * matView * matProjection;
-	matFinal[2] = matTranslate[2] * matRotate[2] * matView * matProjection;
-	matFinal[3] = matTranslate[3] * matRotate[3] * matView * matProjection;
 
+	///Calculate the final matrix
+	// WVP matrix
+	XMMATRIX matFinal = matRotate * matView * matProjection;
 
 
 	///send the data to the const buffers
-	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[0], 0, 0);
-	deviceContext->Draw(3, 0);
-	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[1], 0, 0);
-	deviceContext->Draw(3, 0);
-	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[2], 0, 0);
-	deviceContext->Draw(3, 0);
-	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal[3], 0, 0);
-	deviceContext->Draw(3, 0);
+	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
+	//deviceContext->DrawIndexed(36,0,0);
+	deviceContext->Draw(36, 0);
 
 
 
