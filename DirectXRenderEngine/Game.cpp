@@ -144,15 +144,11 @@ void CGame::InitGraphics()
 
 	VERTEX Vertices[] =
 	{
-		{-1.0f,1.0f,-0.5f,		1.0f,0.0f,0.0f},
-		{1.0f,1.0f,-0.5f,		0.0f,1.0f,0.0f},
-		{-1.0f,-1.0f,-0.5f,		0.0f,0.0f,1.0f},
-		{1.0f,-1.0f,-0.5f,		1.0f,1.0f,0.0f},
-
-		{-1.0f,1.0f,0.5f,		1.0f,0.0f,0.0f},
-		{1.0f,1.0f,0.5f,		0.0f,1.0f,0.0f},
-		{-1.0f,-1.0f,0.5f,		0.0f,0.0f,1.0f},
-		{1.0f,-1.0f,0.5f,		1.0f,1.0f,0.0f},
+		-1,0,1,
+		1,0,1,
+		-1,0,-1,
+		1,0,-1,
+		0,2,0
 
 	};
 	 
@@ -174,38 +170,49 @@ void CGame::InitGraphics()
 	//creating the buffer and storing in the vertex bufffer com object
 	device->CreateBuffer(&bufferDesc, &subResourceData, &vertexBuffer);
 
-	/// Crreating the index buffer
-	short OurIndices[] = 
+	///// Crreating the index buffer
+	//short OurIndices[] = 
+	//{
+	//	//0,1,2,	//Front
+	//	//2,1,3,	
+
+	//	//4,5,6,	//Back
+	//	//6,5,7,	
+
+	//	//4,0,6,	//left
+	//	//6,0,2,
+	//	//	
+	//	//4,5,0,	//Top
+	//	//0,5,1,
+
+	//	//5,7,1,	//Right
+	//	//1,7,3,
+
+	//	//7,3,6,	//Bottom
+	//	//6,3,2,
+
+	//	0,1,2,
+	//	2,1,3,
+	//	4,0,6,
+	//	6,0,2,
+	//	7,5,6,
+	//	6,5,4,
+	//	3,1,7,
+	//	7,1,5,
+	//	4,5,0,
+	//	0,5,1,
+	//	3,7,2,
+	//	2,7,6,
+
+
+	//};
+		/// Crreating the index buffer
+	short OurIndices[] =
 	{
-		//0,1,2,	//Front
-		//2,1,3,	
-
-		//4,5,6,	//Back
-		//6,5,7,	
-
-		//4,0,6,	//left
-		//6,0,2,
-		//	
-		//4,5,0,	//Top
-		//0,5,1,
-
-		//5,7,1,	//Right
-		//1,7,3,
-
-		//7,3,6,	//Bottom
-		//6,3,2,
-		0,1,2,
-		2,1,3,
-		4,0,6,
-		6,0,2,
-		7,5,6,
-		6,5,4,
-		3,1,7,
-		7,1,5,
-		4,5,0,
-		0,5,1,
-		3,7,2,
-		2,7,6,
+		0,1,4,
+		1,3,4,
+		3,2,4,
+		2,0,4
 
 
 	};
@@ -214,6 +221,7 @@ void CGame::InitGraphics()
 	D3D11_BUFFER_DESC indexDesc = { 0 };
 	indexDesc.ByteWidth = sizeof( short) * ARRAYSIZE(OurIndices);
 	indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexDesc.Usage = D3D11_USAGE_DEFAULT;
 	D3D11_SUBRESOURCE_DATA subResourceDataindices = { OurIndices,0,0 };
 	device->CreateBuffer(&indexDesc, &subResourceDataindices, &IndexBuffer);
 
@@ -309,8 +317,7 @@ void CGame::Render()
 
 
 	//settin up the premitive topology
-	deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	///Configuring the matrices
 
@@ -354,8 +361,8 @@ void CGame::Render()
 
 	///send the data to the const buffers
 	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
-	//deviceContext->DrawIndexed(36,0,0);
-	deviceContext->Draw(36, 0);
+	//deviceContext->DrawIndexed(4,0,0);
+	deviceContext->Draw(3, 0);
 
 
 
