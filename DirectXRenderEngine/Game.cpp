@@ -142,15 +142,25 @@ void CGame::InitGraphics()
 {
 	/// SETTING UP THE VERTEX DATA 
 
+	//VERTEX Vertices[] =
+	//{
+	//	-1,0,1,
+	//	1,0,1,
+	//	-1,0,-1,
+	//	1,0,-1,
+	//	0,2,0
+
+	//};
 	VERTEX Vertices[] =
 	{
-		-1,0,1,
-		1,0,1,
-		-1,0,-1,
-		1,0,-1,
-		0,2,0
+		-1.0f,1.0f,0.0f,		1.0f,0.0f,0.0f,
+		1.0f,1.0f,0.0f,		0.0f,1.0f,0.0f,
+
+		-1.0f,-1.0f,0.0f,	0.0f,0.0f,1.0f,
+		1.0f,-1.0f,0.0f,	1.0f,1.0f,0.0f,
 
 	};
+
 	 
 
 	///SETTING UP THE VERTEX  BUFFER
@@ -206,24 +216,43 @@ void CGame::InitGraphics()
 
 
 	//};
-		/// Crreating the index buffer
-	short OurIndices[] =
-	{
-		0,1,4,
-		1,3,4,
-		3,2,4,
-		2,0,4
+	//	/// Crreating the index buffer
+	//short OurIndices[] =
+	//{
+	//	0,1,4,
+	//	1,3,4,
+	//	3,2,4,
+	//	2,0,4
 
+
+	//};
+			/// Crreating the index buffer
+	unsigned int OurIndices[] =
+	{
+		0,1,2,
+		1,3,2
 
 	};
 
 	//create the index buffer
 	D3D11_BUFFER_DESC indexDesc = { 0 };
-	indexDesc.ByteWidth = sizeof( short) * ARRAYSIZE(OurIndices);
+	indexDesc.ByteWidth = sizeof( unsigned int) * ARRAYSIZE(OurIndices);
 	indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexDesc.Usage = D3D11_USAGE_DEFAULT;
-	D3D11_SUBRESOURCE_DATA subResourceDataindices = { OurIndices,0,0 };
-	device->CreateBuffer(&indexDesc, &subResourceDataindices, &IndexBuffer);
+
+	D3D11_SUBRESOURCE_DATA subResourceDataindices;
+	subResourceDataindices.pSysMem = OurIndices;
+	subResourceDataindices.SysMemPitch = 0;
+	subResourceDataindices.SysMemSlicePitch = 0;
+	HREFTYPE hr_INDEXBUFFER = device->CreateBuffer(&bufferDesc, &subResourceDataindices, &IndexBuffer);
+	if (FAILED(hr_INDEXBUFFER))
+	{
+		wchar_t errorMsg[256];
+		swprintf_s(errorMsg, L"indedx buffer creation failed: 0x%X", hr_INDEXBUFFER);
+		OutputDebugString(errorMsg);
+
+		exit(1); // Terminate with an error code.
+	}
 
 }
 
@@ -356,13 +385,14 @@ void CGame::Render()
 
 	///Calculate the final matrix
 	// WVP matrix
-	XMMATRIX matFinal = matRotate * matView * matProjection;
+	//XMMATRIX matFinal = matRotate * matView * matProjection;
+	XMMATRIX matFinal = matRotate ;
 
 
 	///send the data to the const buffers
 	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
-	//deviceContext->DrawIndexed(4,0,0);
-	deviceContext->Draw(3, 0);
+	deviceContext->DrawIndexed(6,0,0);
+	//deviceContext->Draw(3, 0);
 
 
 
