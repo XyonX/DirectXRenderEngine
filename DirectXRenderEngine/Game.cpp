@@ -353,7 +353,18 @@ void CGame::Render()
 	///Mat World
 
 	//XMMATRIX matRotate = XMMatrixRotationY(time);
-	XMMATRIX matRotate = XMMatrixIdentity();
+
+	//XMMATRIX scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	XMMATRIX scaleMatrix = XMMatrixIdentity();
+	 // Start with an identity matrix
+
+	// Set the diagonal elements to scale along x, y, and z axes
+	scaleMatrix.r[0].m128_f32[0] = 0.5f; // Scale along the x-axis by 2x
+	scaleMatrix.r[1].m128_f32[1] =0.5f; // Scale along the y-axis by 1.5x
+	scaleMatrix.r[2].m128_f32[2] = 0.5f; // Scale along the z-axis by 0.5x
+
+
+	XMMATRIX rotateMatrix = XMMatrixRotationZ(time);
 
 	
 	///mat View
@@ -385,8 +396,8 @@ void CGame::Render()
 
 	///Calculate the final matrix
 	// WVP matrix
-	//XMMATRIX matFinal = matRotate * matView * matProjection;
-	XMMATRIX matFinal = matRotate ;
+	//XMMATRIX matFinal = scaleMatrix * matView * matProjection;
+	XMMATRIX matFinal =rotateMatrix* scaleMatrix;
 
 
 	///send the data to the const buffers

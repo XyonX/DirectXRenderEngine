@@ -18,8 +18,8 @@ VOut main( float4 position : POSITION , float4 color : COLOR )
     
 
 	//Manipulat the positon befpe passing to other shaders
-    //Output.position = mul(matFinal ,position);
-    Output.position = position;
+    Output.position = mul(matFinal ,position);
+    //Output.position = position;
     
     
     //Manipulate the color before passign to the other shaders 
