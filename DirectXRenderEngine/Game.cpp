@@ -142,24 +142,41 @@ void CGame::InitGraphics()
 {
 	/// SETTING UP THE VERTEX DATA 
 
-	//VERTEX Vertices[] =
-	//{
-	//	-1,0,1,
-	//	1,0,1,
-	//	-1,0,-1,
-	//	1,0,-1,
-	//	0,2,0
-
-	//};
 	VERTEX Vertices[] =
 	{
-		-1.0f,1.0f,0.0f,		1.0f,0.0f,0.0f,
-		1.0f,1.0f,0.0f,		0.0f,1.0f,0.0f,
+			//{-1.0f,1.0f,-1.0f,		1.0f,0.0f,0.0f},
+			//{1.0f,1.0f,-1.0f,		0.0f,1.0f,0.0f},
+			//{-1.0f,-1.0f,-1.0f,		0.0f,0.0f,1.0f},
+			//{1.0f,-1.0f,-1.0f,		1.0f,1.0f,0.0f},
 
-		-1.0f,-1.0f,0.0f,	0.0f,0.0f,1.0f,
-		1.0f,-1.0f,0.0f,	1.0f,1.0f,0.0f,
+			//{-1.0f,1.0f,1.0f,		1.0f,0.0f,0.0f},
+			//{1.0f,1.0f,1.0f,		0.0f,1.0f,0.0f},
+			//{-1.0f,-1.0f,1.0f,		0.0f,0.0f,1.0f},
+			//{1.0f,-1.0f,1.0f,		1.0f,1.0f,0.0f},
+			{ -0.5f, -0.5f, -0.5f  , 1.0f,0.0f,0.0f}, // 0
+			{ -0.5f,  0.5f, -0.5f  , 0.0f,1.0f,0.0f}, // 1
+			{  0.5f,  0.5f, -0.5f  , 0.0f,0.0f,1.0f }, // 2
+			{  0.5f, -0.5f, -0.5f  ,1.0f,1.0f,0.0f}, // 3
+
+			{ -0.5f, -0.5f,  0.5f , 1.0f,0.0f,0.0f}, // 4
+			{ -0.5f,  0.5f,  0.5f , 0.0f,1.0f,0.0f}, // 5
+			{  0.5f,  0.5f,  0.5f , 0.0f,0.0f,1.0f }, // 6
+			{  0.5f, -0.5f,  0.5f ,1.0f,1.0f,0.0f}  // 7
+
+
 
 	};
+
+
+	//VERTEX Vertices[] =
+	//{
+	//	-1.0f,1.0f,0.0f,		1.0f,0.0f,0.0f,
+	//	1.0f,1.0f,0.0f,		0.0f,1.0f,0.0f,
+
+	//	-1.0f,-1.0f,0.0f,	0.0f,0.0f,1.0f,
+	//	1.0f,-1.0f,0.0f,	1.0f,1.0f,0.0f,
+
+	//};
 
 	 
 
@@ -180,42 +197,58 @@ void CGame::InitGraphics()
 	//creating the buffer and storing in the vertex bufffer com object
 	device->CreateBuffer(&bufferDesc, &subResourceData, &vertexBuffer);
 
-	///// Crreating the index buffer
-	//short OurIndices[] = 
-	//{
-	//	//0,1,2,	//Front
-	//	//2,1,3,	
+	/// Crreating the index buffer
+	unsigned int OurIndices[] = 
+	{
+		//0,1,2,	//Front
+		//1,3,2,	
 
-	//	//4,5,6,	//Back
-	//	//6,5,7,	
+		//4,5,6,	//Back
+		//6,5,7,	
 
-	//	//4,0,6,	//left
-	//	//6,0,2,
-	//	//	
-	//	//4,5,0,	//Top
-	//	//0,5,1,
+		//4,0,6,	//left
+		//6,0,2,
+		//	
+		//4,5,0,	//Top
+		//0,5,1,
 
-	//	//5,7,1,	//Right
-	//	//1,7,3,
+		//5,7,1,	//Right
+		//1,7,3,
 
-	//	//7,3,6,	//Bottom
-	//	//6,3,2,
+		//7,3,6,	//Bottom
+		//6,3,2,
 
-	//	0,1,2,
-	//	2,1,3,
-	//	4,0,6,
-	//	6,0,2,
-	//	7,5,6,
-	//	6,5,4,
-	//	3,1,7,
-	//	7,1,5,
-	//	4,5,0,
-	//	0,5,1,
-	//	3,7,2,
-	//	2,7,6,
+		//0,1,2,
+		//2,1,3,
+		//4,0,6,
+		//6,0,2,
+		//7,5,6,
+		//6,5,4,
+		//3,1,7,
+		//7,1,5,
+		//4,5,0,
+		//0,5,1,
+		//3,7,2,
+		//2,7,6,
 
 
-	//};
+
+	0, 1, 2, // Front face
+	0, 2, 3,
+	4, 5, 1, // Left face
+	4, 1, 0,
+	7, 6, 5, // Back face
+	7, 5, 4,
+	3, 2, 6, // Right face
+	3, 6, 7,
+	1, 5, 6, // Top face
+	1, 6, 2,
+	4, 0, 3, // Bottom face
+	4, 3, 7
+
+
+	};
+
 	//	/// Crreating the index buffer
 	//short OurIndices[] =
 	//{
@@ -226,13 +259,13 @@ void CGame::InitGraphics()
 
 
 	//};
-			/// Crreating the index buffer
-	unsigned int OurIndices[] =
-	{
-		0,1,2,
-		1,3,2
+	//		/// Crreating the index buffer
+	//unsigned int OurIndices[] =
+	//{
+	//	0,1,2,
+	//	1,3,2
 
-	};
+	//};
 
 	//create the index buffer
 	D3D11_BUFFER_DESC indexDesc = { 0 };
@@ -397,12 +430,12 @@ void CGame::Render()
 	///Calculate the final matrix
 	// WVP matrix
 	//XMMATRIX matFinal = scaleMatrix * matView * matProjection;
-	XMMATRIX matFinal =rotateMatrix* scaleMatrix;
+	XMMATRIX matFinal = scaleMatrix;
 
 
 	///send the data to the const buffers
 	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
-	deviceContext->DrawIndexed(6,0,0);
+	deviceContext->DrawIndexed(36,0,0);
 	//deviceContext->Draw(3, 0);
 
 
