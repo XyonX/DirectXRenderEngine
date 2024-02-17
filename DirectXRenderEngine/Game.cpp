@@ -31,6 +31,7 @@ Array<byte>^ LoadShaderFile(std::string File)
 //Initializes and perform Direct3D
 void CGame::Initialize()
 {
+	/// 01 02 CREATING THE DEVICE AND DEVICE CONTEXT
 	ComPtr<ID3D11Device>tempDevice;
 	ComPtr<ID3D11DeviceContext>tempDeviceContext;
 
@@ -41,7 +42,9 @@ void CGame::Initialize()
 	tempDevice.As(&device);
 	tempDeviceContext.As(&deviceContext);
 
-	//1. convertthe D2D11Device1 to IDXGIDevice1
+	///03 SWAP CHAIN CREATION
+
+	//1. convertthe D3D11Device1 to IDXGIDevice1
 	ComPtr<IDXGIDevice1> dxgiDevice;
 	device.As(&dxgiDevice);
 
@@ -66,7 +69,7 @@ void CGame::Initialize()
 
 	CoreWindow^ Window = CoreWindow::GetForCurrentThread();				// Obtain A pointer to the window
 
-	/// CREATING HE SWAPCHAIN
+	/// CREATING THE SWAPCHAIN
 
 	HRESULT hr = dxgiFactory->CreateSwapChainForCoreWindow(
 		device.Get(),
@@ -74,6 +77,7 @@ void CGame::Initialize()
 		&swapChainDescription,
 		nullptr,
 		&swapChain);
+
 
 	//error handling code 
 	if (FAILED(hr))
@@ -85,7 +89,7 @@ void CGame::Initialize()
 		exit(1); // Terminate with an error code.
 	}
 
-	///SETTING UP THE BACKBUFFER WITH SWAPCHAIN
+	///SETTING UP THE BACKBUFFER WITH SWAPCHAIN WITH RENDER TARGET
 
 	// get a direct poionter to the back buffer
 	ComPtr<ID3D11Texture2D> backBuffer;
@@ -102,6 +106,7 @@ void CGame::Initialize()
 	texD.Height = Window->Bounds.Height;
 	texD.ArraySize = 1;
 	texD.MipLevels = 1;
+	texD.SampleDesc.Count = 1;
 	texD.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	texD.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
@@ -137,48 +142,25 @@ void CGame::Initialize()
 
 
 }
-
 void CGame::InitGraphics()
 {
 	/// SETTING UP THE VERTEX DATA 
 
 	VERTEX Vertices[] =
 	{
-			//{-1.0f,1.0f,-1.0f,		1.0f,0.0f,0.0f},
-			//{1.0f,1.0f,-1.0f,		0.0f,1.0f,0.0f},
-			//{-1.0f,-1.0f,-1.0f,		0.0f,0.0f,1.0f},
-			//{1.0f,-1.0f,-1.0f,		1.0f,1.0f,0.0f},
+		{-1.0f,1.0f,-1.0f,	1.0f,0.0f,0.0f},	//vertex 0
+		{1.0f,1.0f,-1.0f,	0.0f,1.0f,0.0f},	//vertex 1
+		{-1.0f,-1.0f,-1.0f,	0.0f,0.0f,1.0f},	//vertex 2
+		{1.0f,-1.0f,-1.0f,	0.0f,1.0f,1.0f},	//vertex 3
 
-			//{-1.0f,1.0f,1.0f,		1.0f,0.0f,0.0f},
-			//{1.0f,1.0f,1.0f,		0.0f,1.0f,0.0f},
-			//{-1.0f,-1.0f,1.0f,		0.0f,0.0f,1.0f},
-			//{1.0f,-1.0f,1.0f,		1.0f,1.0f,0.0f},
-			{ -0.5f, -0.5f, -0.5f  , 1.0f,0.0f,0.0f}, // 0
-			{ -0.5f,  0.5f, -0.5f  , 0.0f,1.0f,0.0f}, // 1
-			{  0.5f,  0.5f, -0.5f  , 0.0f,0.0f,1.0f }, // 2
-			{  0.5f, -0.5f, -0.5f  ,1.0f,1.0f,0.0f}, // 3
-
-			{ -0.5f, -0.5f,  0.5f , 1.0f,0.0f,0.0f}, // 4
-			{ -0.5f,  0.5f,  0.5f , 0.0f,1.0f,0.0f}, // 5
-			{  0.5f,  0.5f,  0.5f , 0.0f,0.0f,1.0f }, // 6
-			{  0.5f, -0.5f,  0.5f ,1.0f,1.0f,0.0f}  // 7
-
+		{-1.0f,1.0f,1.0f,	1.0f,0.0f,0.0f},	//vertex 4
+		{1.0f,1.0f,1.0f,	0.0f,1.0f,0.0f},	//vertex 5
+		{-1.0f,-1.0f,1.0f,	0.0f,0.0f,1.0f},	//vertex 6
+		{1.0f,-1.0f,1.0f,	0.0f,1.0f,1.0f},	//vertex 7
 
 
 	};
 
-
-	//VERTEX Vertices[] =
-	//{
-	//	-1.0f,1.0f,0.0f,		1.0f,0.0f,0.0f,
-	//	1.0f,1.0f,0.0f,		0.0f,1.0f,0.0f,
-
-	//	-1.0f,-1.0f,0.0f,	0.0f,0.0f,1.0f,
-	//	1.0f,-1.0f,0.0f,	1.0f,1.0f,0.0f,
-
-	//};
-
-	 
 
 	///SETTING UP THE VERTEX  BUFFER
 
@@ -200,72 +182,20 @@ void CGame::InitGraphics()
 	/// Crreating the index buffer
 	unsigned int OurIndices[] = 
 	{
-		//0,1,2,	//Front
-		//1,3,2,	
-
-		//4,5,6,	//Back
-		//6,5,7,	
-
-		//4,0,6,	//left
-		//6,0,2,
-		//	
-		//4,5,0,	//Top
-		//0,5,1,
-
-		//5,7,1,	//Right
-		//1,7,3,
-
-		//7,3,6,	//Bottom
-		//6,3,2,
-
-		//0,1,2,
-		//2,1,3,
-		//4,0,6,
-		//6,0,2,
-		//7,5,6,
-		//6,5,4,
-		//3,1,7,
-		//7,1,5,
-		//4,5,0,
-		//0,5,1,
-		//3,7,2,
-		//2,7,6,
-
-
-
-	0, 1, 2, // Front face
-	0, 2, 3,
-	4, 5, 1, // Left face
-	4, 1, 0,
-	7, 6, 5, // Back face
-	7, 5, 4,
-	3, 2, 6, // Right face
-	3, 6, 7,
-	1, 5, 6, // Top face
-	1, 6, 2,
-	4, 0, 3, // Bottom face
-	4, 3, 7
-
+	0, 1, 2,    // side 1
+	2, 1, 3,
+	4, 0, 6,    // side 2
+	6, 0, 2,
+	7, 5, 6,    // side 3
+	6, 5, 4,
+	3, 1, 7,    // side 4
+	7, 1, 5,
+	4, 5, 0,    // side 5
+	0, 5, 1,
+	3, 7, 2,    // side 6
+	2, 7, 6,
 
 	};
-
-	//	/// Crreating the index buffer
-	//short OurIndices[] =
-	//{
-	//	0,1,4,
-	//	1,3,4,
-	//	3,2,4,
-	//	2,0,4
-
-
-	//};
-	//		/// Crreating the index buffer
-	//unsigned int OurIndices[] =
-	//{
-	//	0,1,2,
-	//	1,3,2
-
-	//};
 
 	//create the index buffer
 	D3D11_BUFFER_DESC indexDesc = { 0 };
@@ -277,7 +207,7 @@ void CGame::InitGraphics()
 	subResourceDataindices.pSysMem = OurIndices;
 	subResourceDataindices.SysMemPitch = 0;
 	subResourceDataindices.SysMemSlicePitch = 0;
-	HREFTYPE hr_INDEXBUFFER = device->CreateBuffer(&bufferDesc, &subResourceDataindices, &IndexBuffer);
+	HREFTYPE hr_INDEXBUFFER = device->CreateBuffer(&indexDesc, &subResourceDataindices, &IndexBuffer);
 	if (FAILED(hr_INDEXBUFFER))
 	{
 		wchar_t errorMsg[256];
@@ -357,7 +287,7 @@ void CGame::Update()
 void CGame::Render()
 {
 	//set the render target as active rendeer target
-	deviceContext->OMSetRenderTargets(1, renderTarget.GetAddressOf(), nullptr);
+	deviceContext->OMSetRenderTargets(1, renderTarget.GetAddressOf(),zBuffer.Get());
 
 	///SETTING UP A COLOR FOR THE BACKGROUND
 
@@ -378,44 +308,30 @@ void CGame::Render()
 
 
 
-	//settin up the premitive topology
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	///settin up the premitive topology
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	///Configuring the matrices
-
+	
 	///Mat World
 
-	//XMMATRIX matRotate = XMMatrixRotationY(time);
+	//Translation matrix
 
-	//XMMATRIX scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	//Rotation matrix 
+	XMMATRIX rotateMatrix = XMMatrixRotationZ(time);
+
+	//Scale matrix
 	XMMATRIX scaleMatrix = XMMatrixIdentity();
-	 // Start with an identity matrix
-
-	// Set the diagonal elements to scale along x, y, and z axes
 	scaleMatrix.r[0].m128_f32[0] = 0.5f; // Scale along the x-axis by 2x
 	scaleMatrix.r[1].m128_f32[1] =0.5f; // Scale along the y-axis by 1.5x
 	scaleMatrix.r[2].m128_f32[2] = 0.5f; // Scale along the z-axis by 0.5x
 
 
-	XMMATRIX rotateMatrix = XMMatrixRotationZ(time);
-
-	
 	///mat View
 	
 	//calculate the view transformation
-
 	XMMATRIX matView = XMMatrixLookAtLH(camPosition, camLookAt, camUp);
-
-	//XMVECTOR vectorToPrint = camPosition;
-
-	//// Create a buffer to store the formatted string
-	//char buffer[100]; // Adjust the size according to your needs
-
-	//// Format the XMVECTOR and store it in the buffer
-	//sprintf_s(buffer, sizeof(buffer), "Vector: X=%.2f, Y=%.2f, Z=%.2f, W=%.2f", XMVectorGetX(vectorToPrint), XMVectorGetY(vectorToPrint), XMVectorGetZ(vectorToPrint), XMVectorGetW(vectorToPrint));
-
-	//// Output or display the formatted string
-	//OutputDebugStringA(buffer); // Use OutputDebugStringA for ANSI strings
 
 	///mat proj
 	//calculate the projection transformation
@@ -429,14 +345,13 @@ void CGame::Render()
 
 	///Calculate the final matrix
 	// WVP matrix
-	//XMMATRIX matFinal = scaleMatrix * matView * matProjection;
-	XMMATRIX matFinal = scaleMatrix;
+	XMMATRIX matFinal = scaleMatrix * matView * matProjection;
 
 
 	///send the data to the const buffers
 	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
 	deviceContext->DrawIndexed(36,0,0);
-	//deviceContext->Draw(3, 0);
+	//deviceContext->Draw(4, 0);
 
 
 
