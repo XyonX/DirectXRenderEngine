@@ -63,7 +63,7 @@ void CGame::Initialize()
 
 	swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	//How the swap chain should be utilized
 	swapChainDescription.BufferCount = 2;								//a fromt buffer and a back buffer
-	swapChainDescription.Format = DXGI_FORMAT_B8G8R8A8_UNORM;			//a common swa chain format
+	swapChainDescription.Format = DXGI_FORMAT_B8G8R8A8_UNORM;			//a common swap chain format
 	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	//recommended flip mode
 	swapChainDescription.SampleDesc.Count = 1;							//disable anti aliasing
 
@@ -287,7 +287,7 @@ void CGame::Update()
 void CGame::Render()
 {
 	//set the render target as active rendeer target
-	deviceContext->OMSetRenderTargets(1, renderTarget.GetAddressOf(),zBuffer.Get());
+	deviceContext->OMSetRenderTargets(1, renderTarget.GetAddressOf(), zBuffer.Get());
 
 	///SETTING UP A COLOR FOR THE BACKGROUND
 
@@ -313,7 +313,7 @@ void CGame::Render()
 	//deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	///Configuring the matrices
-	
+
 	///Mat World
 
 	//Translation matrix
@@ -324,18 +324,18 @@ void CGame::Render()
 	//Scale matrix
 	XMMATRIX scaleMatrix = XMMatrixIdentity();
 	scaleMatrix.r[0].m128_f32[0] = 0.5f; // Scale along the x-axis by 2x
-	scaleMatrix.r[1].m128_f32[1] =0.5f; // Scale along the y-axis by 1.5x
+	scaleMatrix.r[1].m128_f32[1] = 0.5f; // Scale along the y-axis by 1.5x
 	scaleMatrix.r[2].m128_f32[2] = 0.5f; // Scale along the z-axis by 0.5x
 
 
 	///mat View
-	
+
 	//calculate the view transformation
 	XMMATRIX matView = XMMatrixLookAtLH(camPosition, camLookAt, camUp);
 
 	///mat proj
 	//calculate the projection transformation
-	CoreWindow^Window = CoreWindow::GetForCurrentThread();
+	CoreWindow^ Window = CoreWindow::GetForCurrentThread();
 
 	XMMATRIX matProjection = XMMatrixPerspectiveLH(XMConvertToRadians(45),
 		(FLOAT)Window->Bounds.Width / (FLOAT)Window->Bounds.Height,
@@ -350,11 +350,12 @@ void CGame::Render()
 
 	///send the data to the const buffers
 	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
-	deviceContext->DrawIndexed(36,0,0);
+	deviceContext->DrawIndexed(36, 0, 0);
 	//deviceContext->Draw(4, 0);
 
 
 
 	//switch the back buffer and the front buffer
 	swapChain->Present(1, 0);
-}
+};
+
