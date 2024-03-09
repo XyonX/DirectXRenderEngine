@@ -1,7 +1,8 @@
 #pragma once
 #include <stdio.h>
 #include <string>
-#include <pch.h>
+
+#include <xnamath.h>
 
 #define BUFSIZE 65536
 

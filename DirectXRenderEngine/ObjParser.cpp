@@ -37,7 +37,7 @@ bool AddFloatBuffer(float value, float** ppBuf, unsigned long* pBufSize, unsigne
 
 //adds a int value to the ppBuf buffer
 
-bool AddFloatBuffer(int value, int** ppBuf, unsigned long* pBufSize, unsigned long* pBufPos)
+bool AddIntBuffer(int value, int** ppBuf, unsigned long* pBufSize, unsigned long* pBufPos)
 {
 	if ((*ppBuf) == NULL)
 		return false;
@@ -103,7 +103,7 @@ bool CObjparser::LoadFile(char* szFileName)
 
 	while (!feof(fp))
 	{
-		//r = GetToken(fp, buf);
+		r = GetToken(fp, buf);
 
 		if (!r) break;
 
@@ -111,8 +111,53 @@ bool CObjparser::LoadFile(char* szFileName)
 		if (strcmp(buf, "v") == 0)
 		{
 			GetToken(fp, buf);
-			//AddFloatBuffer
+			AddFloatBuffer((float)atof(buf), &vbuf, &vbufsize, &vbufpos);
+			GetToken(fp, buf);
+			AddFloatBuffer((float)atof(buf), &vbuf, &vbufsize, &vbufpos);
+			GetToken(fp, buf);
+			AddFloatBuffer((float)atof(buf), &vbuf, &vbufsize, &vbufpos);
+			continue;
 		}
+
+		//vertex normals
+
+		if (strcmp(buf, "vn") == 0) {
+			GetToken(fp, buf);
+			AddFloatBuffer((float)atof(buf), &vnbuf, &vnbufsize, &vnbufpos);
+			GetToken(fp, buf);
+			AddFloatBuffer((float)atof(buf), &vnbuf, &vnbufsize, &vnbufpos);
+			GetToken(fp, buf);
+			AddFloatBuffer((float)atof(buf), &vnbuf, &vnbufsize, &vnbufpos);
+			continue;
+		}
+
+		//vertex texture coordinates
+		if (strcmp(buf, "vt") == 0) {
+			GetToken(fp, buf);
+			AddFloatBuffer((float)atof(buf), &vtbuf, &vtbufsize, &vtbufpos);
+			GetToken(fp, buf);
+			AddFloatBuffer((float)atof(buf), &vtbuf, &vtbufsize, &vtbufpos);
+			continue;
+		}
+		int i;
+		//vertex faces
+		if (strcmp(buf, "f") == 0) {
+			for (i = 0; i < 3; i++)
+			{
+				GetToken(fp, buf);
+				a = b = c = 0;
+				if (strstr(buf, "//") == 0)
+					scanf_s(buf, "%d/%d/%d", &a, &b, &c, BUFSIZE);
+				else
+					scanf_s(buf, "%d//%d", &a, &b, &c, BUFSIZE);
+				AddIntBuffer(a, &fbuf, &fbufsize, &fbufpos);
+				AddIntBuffer(b, &fbuf, &fbufsize, &fbufpos);
+				AddIntBuffer(c, &fbuf, &fbufsize, &fbufpos);
+			}
+			continue;
+		}
+		//skip comments and unknown items
+		SkipLine(fp);
 
 	}
 
