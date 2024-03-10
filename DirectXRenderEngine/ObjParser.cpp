@@ -1,4 +1,7 @@
+#include"pch.h"
 #include "ObjParser.h"
+#include <io.h>
+#include <fcntl.h>
 
 
 //Reads a token from the file and places it in buf
@@ -24,9 +27,12 @@ bool AddFloatBuffer(float value, float** ppBuf, unsigned long* pBufSize, unsigne
 {
 	if ((*ppBuf) == NULL)
 		return false;
+
 	(*ppBuf)[*pBufPos] = value;
 	(*pBufPos)++;
-	if ((*pBufPos) >= *pBufSize) {
+
+	if ((*pBufPos) >= *pBufSize)
+	{
 		(*ppBuf) = (float*)realloc((void*)(*ppBuf), ((*pBufSize) + BUFSIZE) * sizeof(float));
 		if ((*ppBuf) == NULL)
 			return false;
@@ -56,10 +62,13 @@ bool AddIntBuffer(int value, int** ppBuf, unsigned long* pBufSize, unsigned long
 
 CObjparser::CObjparser()
 {
+	m_pVertex = NULL;
+	m_nVertexCount = 0;
 }
 
 CObjparser::~CObjparser()
 {
+	Clear();
 }
 
 bool CObjparser::LoadFile(char* szFileName)
@@ -67,9 +76,19 @@ bool CObjparser::LoadFile(char* szFileName)
 
 	//Open the file
 	FILE* fp = NULL;
-	fopen_s(&fp, szFileName, "rb");
+	//fopen_s(&fp, szFileName, "rb");
 	if (fp == NULL)
+	{
+		int errNum = errno;
+		char errMsg[256]; // Define a buffer for the error message
+		if (strerror_s(errMsg, sizeof(errMsg), errNum) == 0) {
+			fprintf(stderr, "Error opening file: %s\n", errMsg);
+		}
+		else {
+			fprintf(stderr, "Error opening file: Unknown error\n");
+		}
 		return false;
+	}
 
 	//variables
 	int r, a, b, c;
@@ -80,12 +99,12 @@ bool CObjparser::LoadFile(char* szFileName)
 	unsigned long vbufsize = BUFSIZE;
 	unsigned long vbufpos = 0;
 
-	//File vertexe normal
+	//File vertex normal
 	float* vnbuf = (float*)malloc(BUFSIZE * sizeof(float));
 	unsigned long vnbufsize = BUFSIZE;
 	unsigned long vnbufpos = 0;
 
-	//File vertexe texture coordinate
+	//File vertex texture coordinate
 	float* vtbuf = (float*)malloc(BUFSIZE * sizeof(float));
 	unsigned long vtbufsize = BUFSIZE;
 	unsigned long vtbufpos = 0;
@@ -139,10 +158,10 @@ bool CObjparser::LoadFile(char* szFileName)
 			AddFloatBuffer((float)atof(buf), &vtbuf, &vtbufsize, &vtbufpos);
 			continue;
 		}
-		int i;
+
 		//vertex faces
 		if (strcmp(buf, "f") == 0) {
-			for (i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
 				GetToken(fp, buf);
 				a = b = c = 0;
@@ -161,10 +180,58 @@ bool CObjparser::LoadFile(char* szFileName)
 
 	}
 
+	//convert (non-indexed)
+	m_nVertexCount = fbufpos / 3;
+	m_pVertex = (VertexObj*)malloc(m_nVertexCount * sizeof(VertexObj));
+	if (m_pVertex == NULL)
+		return false;
+	::memset((void*)m_pVertex, 0, m_nVertexCount * sizeof(VertexObj));
+	unsigned long vi, vti, vni, f;
+	for (int i = 0; i < (int)m_nVertexCount; i++)
+	{
+		f = i * 3;
+		vi = fbuf[f + 0] - 1;
+		vti = fbuf[f + 1] - 1;
+		vni = fbuf[f + 2] - 1;
 
-	return false;
+		//vertex
+		if (vi < vbufpos)
+		{
+			m_pVertex[i].pos.x = vbuf[vi * 3 + 0];
+			m_pVertex[i].pos.y = vbuf[vi * 3 + 1];
+			m_pVertex[i].pos.z = vbuf[vi * 3 + 2];
+		}
+		//texture coordinate
+		if (vi < vtbufpos)
+		{
+			m_pVertex[i].tex0.x = vtbuf[vi * 2 + 0];
+			m_pVertex[i].tex0.y = vtbuf[vi * 2 + 1];
+		}
+		//normal
+		if (vni < vnbufpos)
+		{
+			m_pVertex[i].norm.x = vnbuf[vni * 3 + 0];
+			m_pVertex[i].norm.y = vnbuf[vni * 3 + 1];
+			m_pVertex[i].norm.z = vnbuf[vni * 3 + 2];
+		}
+	}
+	//cleanup
+	free(vbuf);
+	free(vnbuf);
+	free(vtbuf);
+	free(fbuf);
+	fclose(fp);
+
+
+	return true;
 }
 
 void CObjparser::Clear()
 {
+	if (m_pVertex != NULL)
+	{
+		free(m_pVertex);
+	}
+	m_pVertex = NULL;
+	m_nVertexCount = 0;
 }
