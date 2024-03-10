@@ -1,8 +1,7 @@
 #include"pch.h"
-#include"ObjParser.h"
 #include"Game.h"
 #include <fstream>
-#include <Windows.h>
+
 
 // this function loads a file into an Array^
 Array<byte>^ LoadShaderFile(std::string File)
@@ -136,8 +135,7 @@ void CGame::Initialize()
 
 
 	/// CALLING THE GRAPHIC INITIALIZATION FILE
-	if (!LoadContent())
-		return;
+	InitGraphics();
 	InitPipeline();
 	InitData();
 
@@ -162,9 +160,6 @@ void CGame::InitGraphics()
 
 
 	};
-
-	//loacding the obj file
-
 
 
 	///SETTING UP THE VERTEX  BUFFER
@@ -245,20 +240,12 @@ void CGame::InitPipeline()
 	deviceContext->PSSetShader(pixelShader.Get(), nullptr, 0);
 
 	/// CREATING INPUT LAYOUT
-	/*
+
 	//initialize input layout
 	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-
-	};*/
-	//initialize input layout
-	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
 
 	};
 	//creating the input layout 
@@ -314,11 +301,10 @@ void CGame::Render()
 
 	/// SETTING UP THE VERTEX BUFFER 
 	//seting up vertex buffer
-	//UINT stride = sizeof(VERTEX);
-	UINT stride = sizeof(VertexObj);
+	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
 	deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	//deviceContext->IASetIndexBuffer(IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	deviceContext->IASetIndexBuffer(IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 
 
@@ -364,46 +350,12 @@ void CGame::Render()
 
 	///send the data to the const buffers
 	deviceContext->UpdateSubresource(constBuffer.Get(), 0, 0, &matFinal, 0, 0);
-	//deviceContext->DrawIndexed(36, 0, 0);
-	deviceContext->Draw(m_ObjParser->m_nVertexCount, 0);
+	deviceContext->DrawIndexed(36, 0, 0);
+	//deviceContext->Draw(4, 0);
 
 
 
 	//switch the back buffer and the front buffer
 	swapChain->Present(1, 0);
-}
-bool CGame::LoadContent()
-{
-	m_ObjParser = new CObjparser();
-	//loooad the obj model
-	bool res = m_ObjParser->LoadFile("cube.obj");
-
-	if (res == false)
-	{
-		//::MessageBox()
-		printf("Error loading obj");
-		return false;
-	}
-	//Create vertex descripotion
-	D3D11_BUFFER_DESC VertexDesc = { 0 };
-	::ZeroMemory(&VertexDesc, sizeof(VertexDesc));
-	VertexDesc.Usage = D3D11_USAGE_DEFAULT;
-	VertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;// what kind of buffer we want 
-	VertexDesc.ByteWidth = sizeof(VertexObj) * m_ObjParser->m_nVertexCount;// the size of the buffer we want to make 
-
-	//Resource Data
-	D3D11_SUBRESOURCE_DATA subResourceData;
-	subResourceData.pSysMem = m_ObjParser->m_pVertex;
-
-	//creating the buffer and storing in the vertex bufffer com object
-	HRESULT hr = device->CreateBuffer(&VertexDesc, &subResourceData, &vertexBuffer);
-
-	if (FAILED(hr))
-	{
-		return false;
-	}
-
-	return false;
-}
-;
+};
 
