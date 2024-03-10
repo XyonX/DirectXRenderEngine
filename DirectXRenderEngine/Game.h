@@ -6,6 +6,7 @@ using namespace Microsoft::WRL;
 using namespace Windows::UI::Core;
 using namespace Platform;
 using namespace DirectX;
+class CObjparser;
 
 class CGame
 {
@@ -24,7 +25,7 @@ public:
 
 	ComPtr<ID3D11Buffer>constBuffer;
 	ComPtr<ID3D11DepthStencilView>zBuffer;
-
+	CObjparser* m_ObjParser;
 
 
 	struct VERTEX
@@ -43,6 +44,7 @@ public:
 	void InitData();
 	void Update();		//Code that manipulate game
 	void Render();		//Draw graphics
+	bool LoadContent();
 
 
 	float time;
@@ -50,6 +52,8 @@ public:
 	XMVECTOR camPosition;
 	XMVECTOR camLookAt;
 	XMVECTOR camUp;
+
+
 
 	//XMFLOAT3 camPosition;
 	//XMFLOAT3 camLookAt;

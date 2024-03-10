@@ -1,8 +1,9 @@
 #pragma once
 #include <stdio.h>
 #include <string>
+#include <DirectXMath.h>
 
-#include <xnamath.h>
+using namespace DirectX;
 
 #define BUFSIZE 65536
 
